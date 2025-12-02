@@ -1,30 +1,38 @@
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 const ApiError = require("./app/api-error");
 
 const app = express();
 
-const contactRouter = require("./app/routes/contact.route");
+const publisherRouter = require("./app/routes/publisher.route");
+const userRouter = require("./app/routes/user.route");
+const staffRouter = require("./app/routes/staff.route");
+const bookRouter = require("./app/routes/book.route");
+const bookBorrow = require("./app/routes/bookborrow.route");
 
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to contact book application." });
-});
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/api/publishers", publisherRouter);
+app.use("/api/users", userRouter);
+app.use("/api/staffs", staffRouter);
+app.use("/api/books", bookRouter);
+app.use("/api/bookborrows", bookBorrow);
 
-app.use("/api/contacts", contactRouter);
 app.use((req, res, next) => {
-  //Khi kgoonf có route nào khớp với yêu cầu
   return next(new ApiError(404, "Resource not found"));
 });
 
-// Middleware xử lý lỗi tập trung (đặt sau cùng)
-app.use((error, req, res, next) => {
-  // Nếu không có statusCode, mặc định là 500
-  return res.status(error.statusCode || 500).json({
-    message: error.message || "Internal Server Error",
+app.use((err, req, res, next) => {
+  return res.status(err.statusCode || 500).json({
+    message: err.message || "Internal Server Error",
   });
+});
+
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to connect Libary" });
 });
 
 module.exports = app;
